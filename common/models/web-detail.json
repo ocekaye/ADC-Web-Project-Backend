@@ -1,6 +1,6 @@
 {
-  "name": "Account",
-  "base": "User",
+  "name": "WebDetail",
+  "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
@@ -9,29 +9,22 @@
     "TimeStamp": true
   },
   "properties": {
-    "access": {
-      "type": "number",
+    "name": {
+      "type": "string",
       "required": true
     },
-    "picture": {
+    "kayword": {
       "type": "string"
     },
-    "phone": {
+    "title": {
       "type": "string"
     },
-    "steam_url": {
+    "description": {
       "type": "string"
     }
   },
   "validations": [],
   "relations": {},
-  "acls": [
-    {
-      "accessType": "*",
-      "principalType": "ROLE",
-      "principalId": "$authenticated",
-      "permission": "ALLOW"
-    }
-  ],
+  "acls": [],
   "methods": {}
 }
