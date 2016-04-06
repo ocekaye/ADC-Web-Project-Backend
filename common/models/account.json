@@ -1,0 +1,27 @@
+{
+  "name": "Account",
+  "base": "User",
+  "idInjection": true,
+  "options": {
+    "validateUpsert": true
+  },
+  "properties": {
+    "access": {
+      "type": "number",
+      "required": true
+    },
+    "picture": {
+      "type": "string"
+    },
+    "phone": {
+      "type": "string"
+    },
+    "steam_url": {
+      "type": "string"
+    }
+  },
+  "validations": [],
+  "relations": {},
+  "acls": [],
+  "methods": {}
+}
