@@ -6,9 +6,9 @@
     "validateUpsert": true
   },
   "mixins": {
-   "TimeStamp" : {
-        "required" : false
-      }
+    "TimeStamp": {
+      "required": false
+    }
   },
   "properties": {
     "comment": {
@@ -18,6 +18,19 @@
   },
   "validations": [],
   "relations": {},
-  "acls": [],
+  "acls": [
+    {
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "$unauthenticated",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "WRITE",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    }
+  ],
   "methods": {}
 }

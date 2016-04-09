@@ -56,5 +56,13 @@
   "Comment": {
     "dataSource": "mongo",
     "public": true
+  },
+  "admin": {
+    "dataSource": "mongo",
+    "public": true
+  },
+  "writer": {
+    "dataSource": "mongo",
+    "public": true
   }
 }

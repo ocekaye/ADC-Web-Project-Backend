@@ -1,5 +1,5 @@
 module.exports = function(WebDetail) {
-var loopback = require('loopback');
+var helpers = require('utils');
 	WebDetail.remoteMethod(
 		'getIdByToken',
 		{
@@ -9,9 +9,7 @@ var loopback = require('loopback');
 		});
 
 		WebDetail.getIdByToken = function(callback){
-			var ctx = loopback.getCurrentContext();
-			  // Get the current access token
-			  var accessToken = ctx.get('accessToken');
+			  var accessToken = helpers.account.get();
 			  callback(null, accessToken);
 		};
 

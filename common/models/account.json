@@ -6,32 +6,50 @@
     "validateUpsert": true
   },
   "mixins": {
-    "TimeStamp" : {
-        "required" : false
-      }
+    "TimeStamp": {
+      "required": false
+    }
   },
   "properties": {
-    "access": {
-      "type": "number",
-      "required": true
-    },
     "picture": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "phone": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "steam_url": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "Content": {
+      "type": "hasMany",
+      "model": "Content",
+      "foreignKey": "accountId"
+    }    
+  },
   "acls": [
     {
       "accessType": "*",
       "principalType": "ROLE",
-      "principalId": "$authenticated",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": "findById"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
       "permission": "ALLOW"
     }
   ],

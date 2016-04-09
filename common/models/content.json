@@ -6,9 +6,9 @@
     "validateUpsert": true
   },
   "mixins": {
-    "TimeStamp" : {
-        "required" : false
-      }
+    "TimeStamp": {
+      "required": false
+    }
   },
   "properties": {
     "title": {
@@ -16,22 +16,69 @@
       "required": true
     },
     "description": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "data": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "picture": {
-      "type": "string"
+      "type": "string",
+      "default": ""
     },
     "views": {
       "type": "number",
-      "required": true,
-      "default": "0"
+      "default": 0
+    },
+    "publish": {
+      "type": "boolean",
+      "default": true
     }
   },
   "validations": [],
-  "relations": {},
-  "acls": [],
+  "relations": {
+    "owner": {
+      "type": "belongsTo",
+      "model": "Account",
+      "foreignKey": "accountId"
+    }
+  },
+  "acls": [
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "DENY"
+    },
+    {
+      "accessType": "READ",
+      "principalType": "ROLE",
+      "principalId": "$everyone",
+      "permission": "ALLOW",
+      "property": [
+        "findById",
+        "count"
+      ]
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "admin",
+      "permission": "ALLOW"
+    },
+    {
+      "accessType": "*",
+      "principalType": "ROLE",
+      "principalId": "writer",
+      "permission": "ALLOW",
+      "property": [
+        "new",
+        "findContent",
+        "__get__owner",
+        "edit"
+      ]
+    }
+  ],
   "methods": {}
 }
