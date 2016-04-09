@@ -44,5 +44,17 @@
   "Content": {
     "dataSource": "mongo",
     "public": true
+  },
+  "Category": {
+    "dataSource": "mongo",
+    "public": true
+  },
+  "Tag": {
+    "dataSource": "mongo",
+    "public": true
+  },
+  "Comment": {
+    "dataSource": "mongo",
+    "public": true
   }
 }

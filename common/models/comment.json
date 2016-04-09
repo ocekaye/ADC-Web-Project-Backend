@@ -1,28 +1,19 @@
 {
-  "name": "WebDetail",
+  "name": "Comment",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
   },
   "mixins": {
-    "TimeStamp" : {
+   "TimeStamp" : {
         "required" : false
       }
   },
   "properties": {
-    "name": {
+    "comment": {
       "type": "string",
       "required": true
-    },
-    "kayword": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
-    "description": {
-      "type": "string"
     }
   },
   "validations": [],

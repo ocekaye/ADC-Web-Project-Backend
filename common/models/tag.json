@@ -1,27 +1,19 @@
 {
-  "name": "WebDetail",
+  "name": "Tag",
   "base": "PersistedModel",
   "idInjection": true,
   "options": {
     "validateUpsert": true
-  },
-  "mixins": {
-    "TimeStamp" : {
-        "required" : false
-      }
   },
   "properties": {
     "name": {
       "type": "string",
       "required": true
     },
-    "kayword": {
-      "type": "string"
-    },
-    "title": {
-      "type": "string"
-    },
     "description": {
+      "type": "string"
+    },
+    "image": {
       "type": "string"
     }
   },

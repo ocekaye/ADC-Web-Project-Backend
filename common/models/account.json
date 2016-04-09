@@ -6,7 +6,9 @@
     "validateUpsert": true
   },
   "mixins": {
-    "TimeStamp": true
+    "TimeStamp" : {
+        "required" : false
+      }
   },
   "properties": {
     "access": {
