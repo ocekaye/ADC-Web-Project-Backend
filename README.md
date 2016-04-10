@@ -19,7 +19,7 @@ Teman teman ADC yang bisa dan mau bantu pembuatan API ADC boleh ikut gabung untu
 ## Authorization
 untuk verifikasi user. setiap request di kasih authorization di header.
 
->***access_token** didapat dari user login -> 'id'*
+>**access_token** *didapat dari user login -> 'id'.*
 
 *contoh **PHP** :*
 
