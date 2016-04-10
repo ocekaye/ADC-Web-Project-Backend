@@ -21,7 +21,7 @@ untuk verifikasi user. setiap request di kasih authorization di header.
 
 >**access_token** *didapat dari user login -> 'id'.*
 
-*contoh **PHP** :*
+*contoh* **PHP :**
 
     <?php
     
