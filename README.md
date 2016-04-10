@@ -56,7 +56,8 @@ untuk verifikasi user. setiap request di kasih authorization di header.
       "steam_url": "string",
       "username": "string",
       "email": "string",
-      "status": "string"
+      "status": "string",
+      "password": "string"
     }
 
 ##Login
