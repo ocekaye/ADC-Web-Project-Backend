@@ -162,7 +162,7 @@ Hitung Jumlah Content
 >## **`GET`** /Contents/count  *(Writer | Admin)*
 >#### return body
     {
-  	   "count": 2
+  	   "count": integer
     }
 
 
