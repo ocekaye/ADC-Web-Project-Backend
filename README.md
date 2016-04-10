@@ -16,6 +16,36 @@ Teman teman ADC yang bisa dan mau bantu pembuatan API ADC boleh ikut gabung untu
 # Pengunaan API
 **Base API** *(misal) api.acd.com:3000/api*
 
+## Authorization
+untuk verifikasi user. setiap request di kasih authorization di header.
+
+>***access_token** didapat dari user login -> 'id'*
+
+*contoh **PHP** :*
+
+    <?php
+    
+    $client = new http\Client;
+    $request = new http\Client\Request;
+    
+    $body = new http\Message\Body;
+    $body->addForm(array(
+      'data' => 'data yang di kirim'
+    ), NULL);
+    
+    $request->setRequestUrl('http://api.adc.com:3000/api');
+    $request->setRequestMethod('POST');
+    $request->setBody($body);
+    
+    $request->setHeaders(array(
+      'cache-control' => 'no-cache',
+      'authorization' => 'access_token'
+    ));
+    
+    $client->enqueue($request)->send();
+
+
+
 ##Tambah user
 >## **`POST`** /Accounts  *(Admin)*
 >#### Send Body
