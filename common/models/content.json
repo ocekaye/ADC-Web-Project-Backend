@@ -20,7 +20,9 @@
       "default": ""
     },
     "data": {
-      "type": "string",
+      "type": [
+        "object"
+      ],
       "default": ""
     },
     "picture": {
@@ -42,6 +44,11 @@
       "type": "belongsTo",
       "model": "Account",
       "foreignKey": "accountId"
+    },
+    "category": {
+      "type": "hasMany",
+      "model": "CategoryTerm",
+      "foreignKey": "contentId"
     }
   },
   "acls": [
@@ -57,7 +64,7 @@
       "principalId": "$everyone",
       "permission": "ALLOW",
       "property": [
-        "findById",
+        "findContent",
         "count"
       ]
     },

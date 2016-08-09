@@ -23,7 +23,13 @@
     }
   },
   "validations": [],
-  "relations": {},
+  "relations": {
+    "content": {
+      "type": "hasMany",
+      "model": "CategoryTerm",
+      "foreignKey": "categoryId"
+    }
+  },
   "acls": [
     {
       "accessType": "WRITE",

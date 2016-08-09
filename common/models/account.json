@@ -30,7 +30,7 @@
       "type": "hasMany",
       "model": "Content",
       "foreignKey": "accountId"
-    }    
+    }
   },
   "acls": [
     {

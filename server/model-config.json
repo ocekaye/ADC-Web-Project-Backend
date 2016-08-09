@@ -64,5 +64,13 @@
   "writer": {
     "dataSource": "mongo",
     "public": true
+  },
+  "CategoryTerm": {
+    "dataSource": "mongo",
+    "public": true
+  },
+  "contentType": {
+    "dataSource": "mongo",
+    "public": true
   }
 }
