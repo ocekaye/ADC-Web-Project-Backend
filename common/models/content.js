@@ -41,6 +41,57 @@ module.exports = function(Content) {
 		
 	};
 
+	Content.remoteMethod('delete',
+	{
+		http: { path: '/:id/delete', verb: 'delete' },
+
+		accepts: [
+			{ arg: 'id', type: 'string', required: true}
+		],
+		description: [
+			'Delete content.'
+		],
+		
+		returns:{ arg: 'result', type: 'string', 'root': true }
+		
+	});
+
+	Content.delete = function(id, callback){
+		var accessToken = helpers.account.get();
+		Content.findContent(id, function(err, result){
+			if(err) callback(err);
+			else {
+				new Promise(function(resolve, reject){
+					result.owner(function(err, owner){
+						if(err) reject(err);
+						else{
+							resolve(owner);
+						} 
+					});
+				}).then(function(owner){
+					if(""+accessToken.userId === ""+owner.id){
+						Content.deleteById(id, function(err, res){
+							if(err) reject(err);
+							else {
+								callback(null, res);
+							}
+						});
+					}
+					else {
+						var error = new Error();
+						error.status = 401;
+						error.message = 'Authorization Required';
+						error.code = 'AUTHORIZATION_REQUIRED';
+						callback(error);
+					}
+				}).catch(function(err){
+					callback(err)
+				});
+			}
+		});
+		
+	};
+
 	Content.remoteMethod('edit',
 	{
 		http: { path: '/:id/edit', verb: 'post' },
@@ -92,40 +143,127 @@ module.exports = function(Content) {
 	
 	Content.findContent = function(id, callback){
 		var ctg = Content.app.models.CategoryTerm;
-		var filter = {include: ['owner']};
+		var filter = {include: ['owner', 'category']};
 		
 		Content.findById(id, filter, function(err, result){
 			if(err) callback(err)
 			else {
-				var fltr = {"contentId": result.id};
-				new Promise(function(resolve, reject){
-					ctg.find(fltr, function(err, res){
-						if(err) reject(err);
-						else{
-							var ids = [];
-							for(var i = 0; i < res.length; i++){
-								ids.push(res[i].categoryId);
-							}
-							resolve(ids);
-						}
-					});
-				}).then(function(res){
-					console.log(res);
-					ctg.getDetail(res, function(err, data){
-						if(err) reject(err)
-						else {
-							console.log(data);
-							result.categories = data;
-							callback(null, result);
-						}
-					})
-				}).catch(function(err){
-					callback(err)
-				});
+				callback(null, result);
+				// var fltr = {"contentId": result.id};
+				// new Promise(function(resolve, reject){
+				// 	ctg.find(fltr, function(err, res){
+				// 		if(err) reject(err);
+				// 		else{
+				// 			var ids = [];
+				// 			for(var i = 0; i < res.length; i++){
+				// 				ids.push(res[i].categoryId);
+				// 			}
+				// 			resolve(ids);
+				// 		}
+				// 	});
+				// }).then(function(res){
+				// 	console.log(res);
+				// 	ctg.getDetail(res, function(err, data){
+				// 		if(err) reject(err)
+				// 		else {
+				// 			// console.log(data);
+				// 			result.categories = data;
+				// 			callback(null, result);
+				// 		}
+				// 	})
+				// }).catch(function(err){
+				// 	callback(err)
+				// });
 				
 				
 			}
 		});
 	};
+
+	Content.remoteMethod('show',
+	{
+		http: {path: '/find', verb: 'get'},
+		accepts: [
+			{arg: 'offset', type:'string', description: 'offset.'},
+			{arg: 'limit', type:'string', description: 'limit.'}
+		],
+		description: ['Find content'],
+		returns: {arg: 'result', type: 'string', root: true}
+	});
+
+	Content.show = function(offset, limit, callback){
+		var ctg = Content.app.models.CategoryTerm;
+		if (!offset) offset = 0;
+		if (!limit) limit = 6;
+		var filter = {include: ['owner', 'category'], skip: offset, limit: limit};
+		
+		Content.find(filter, function(err, result){
+			if(err) callback(err)
+			else {
+				var promises = [];
+				var data;
+				var prom1 = new Promise(function(resolve, reject){
+					ctg.find(fltr, function(err, res){
+						if(err) reject(err);
+						else{
+							var ids = [];
+							for(var j = 0; j < res.length; j++){
+								ids.push(res[j].categoryId);
+							}
+							resolve(ids);
+						}
+					});
+				}).then(function(res){
+
+				});
+				callback(null, result);
+				// var dataResult = [];
+				// var prom = [];
+				// for (var i = 0; i < result.length; i++) {		
+				// 	new Promise(function(resolveParrent, rejectParrent){
+				// 		var loop = i;
+				// 		var current = result[loop];
+				// 		var fltr = {"contentId": current.id};
+						
+				// 		new Promise(function(resolve, reject){							
+				// 			ctg.find(fltr, function(err, res){
+				// 				if(err) reject(err);
+				// 				else{
+				// 					var ids = [];
+				// 					for(var j = 0; j < res.length; j++){
+				// 						ids.push(res[j].categoryId);
+				// 					}
+				// 					resolve(ids);
+				// 				}
+				// 			});
+				// 		}).then(function(res){
+				// 			// console.log(res);
+				// 			ctg.getDetail(res, function(err, data){
+				// 				if(err) reject(err)
+				// 				else {
+				// 					console.log("a = "+loop);
+				// 					console.log(data);
+				// 					current.categories = data;
+				// 					dataResult.push(current);
+				// 					resolveParrent(loop);
+				// 				}
+				// 			})
+				// 		}).catch(function(err){
+				// 			callback(err)
+				// 		});
+				// 	}).then(function(loop){
+				// 		console.log("b = "+loop);
+				// 		if(loop == result.length-1) callback(null, dataResult);
+				// 			// console.log(dataResult);
+				// 	}).catch(function(err){
+				// 		callback(err)
+				// 	});
+				// }
+				
+			}
+		});
+	};
+
+
 
 };
