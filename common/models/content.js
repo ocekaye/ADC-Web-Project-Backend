@@ -1,3 +1,5 @@
+var Promise = require('bluebird');
+
 module.exports = function(Content) {
 	var helpers = require('utils');
 	Content.disableRemoteMethod('create', true);               
@@ -142,40 +144,39 @@ module.exports = function(Content) {
 	});
 	
 	Content.findContent = function(id, callback){
-		var ctg = Content.app.models.CategoryTerm;
-		var filter = {include: ['owner', 'category']};
+		var ctgT = Content.app.models.CategoryTerm;
+		var ctg = Content.app.models.Category;
+		var filter = {include: ['owner']};
 		
 		Content.findById(id, filter, function(err, result){
 			if(err) callback(err)
 			else {
-				callback(null, result);
-				// var fltr = {"contentId": result.id};
-				// new Promise(function(resolve, reject){
-				// 	ctg.find(fltr, function(err, res){
-				// 		if(err) reject(err);
-				// 		else{
-				// 			var ids = [];
-				// 			for(var i = 0; i < res.length; i++){
-				// 				ids.push(res[i].categoryId);
-				// 			}
-				// 			resolve(ids);
-				// 		}
-				// 	});
-				// }).then(function(res){
-				// 	console.log(res);
-				// 	ctg.getDetail(res, function(err, data){
-				// 		if(err) reject(err)
-				// 		else {
-				// 			// console.log(data);
-				// 			result.categories = data;
-				// 			callback(null, result);
-				// 		}
-				// 	})
-				// }).catch(function(err){
-				// 	callback(err)
-				// });
-				
-				
+				new Promise(function(resolve, reject){
+					console.log(id);
+					ctgT.find({"where":{"contentId":id}}, function(err , category){
+						if(err) reject(err);
+						else{
+							// console.log(category);
+							resolve(category);
+						} 
+					});
+				}).then(function(category){
+					var idCategorys = [];
+					for (var i = 0; i < category.length; i++ ){
+						idCategorys.push(category[i].categoryId);
+					}
+					return idCategorys;
+				}).then(function(idCategorys){
+					// console.log(idCategorys);
+					var filter = {"where": {"id":{"inq":idCategorys}}};
+					ctg.find(filter, function(err, res){
+						if(err) reject(err);
+						else{
+							result.categorys = res;
+							callback(null, result);
+						} 
+					});
+				});				
 			}
 		});
 	};
@@ -192,74 +193,74 @@ module.exports = function(Content) {
 	});
 
 	Content.show = function(offset, limit, callback){
-		var ctg = Content.app.models.CategoryTerm;
+		var ctgT = Content.app.models.CategoryTerm;
+		var ctg = Content.app.models.Category;
 		if (!offset) offset = 0;
 		if (!limit) limit = 6;
-		var filter = {include: ['owner', 'category'], skip: offset, limit: limit};
+		var filter = {include: ['owner'], skip: offset, limit: limit};
 		
 		Content.find(filter, function(err, result){
 			if(err) callback(err)
 			else {
-				var promises = [];
-				var data;
-				var prom1 = new Promise(function(resolve, reject){
-					ctg.find(fltr, function(err, res){
-						if(err) reject(err);
-						else{
-							var ids = [];
-							for(var j = 0; j < res.length; j++){
-								ids.push(res[j].categoryId);
-							}
-							resolve(ids);
+				data = [];
+				var sum = 0, stop =  result.length;
+				console.log("length = "+stop);
+				var prom1 = function(content){
+					return new Promise(function(resolve, reject){
+						ctgT.find({"where":{"contentId":content.id}}, function(err , category){
+							if(err) reject(err);
+							else{
+								// console.log(category);
+								resolve(category);
+							} 
+						});
+					}).then(function(category){
+						var idCategorys = [];
+						for (var i = 0; i < category.length; i++ ){
+							idCategorys.push(category[i].categoryId);
 						}
-					});
-				}).then(function(res){
+						return idCategorys;
+					}).then(function(idCategorys){
+						// console.log(idCategorys);
+						var filter = {"where": {"id":{"inq":idCategorys}}};
+						ctg.find(filter, function(err, res){
+							if(err) reject(err);
+							else{
+								content.categorys = res;
+								data.push(content);
+								sum++;
+							} 
+						});
+					}).catch(function(err){
+						sum++;
+					});		
+				}
+				var promiseWhile = function(condition, action) {
+				    var resolver = Promise.defer();
 
-				});
-				callback(null, result);
-				// var dataResult = [];
-				// var prom = [];
-				// for (var i = 0; i < result.length; i++) {		
-				// 	new Promise(function(resolveParrent, rejectParrent){
-				// 		var loop = i;
-				// 		var current = result[loop];
-				// 		var fltr = {"contentId": current.id};
-						
-				// 		new Promise(function(resolve, reject){							
-				// 			ctg.find(fltr, function(err, res){
-				// 				if(err) reject(err);
-				// 				else{
-				// 					var ids = [];
-				// 					for(var j = 0; j < res.length; j++){
-				// 						ids.push(res[j].categoryId);
-				// 					}
-				// 					resolve(ids);
-				// 				}
-				// 			});
-				// 		}).then(function(res){
-				// 			// console.log(res);
-				// 			ctg.getDetail(res, function(err, data){
-				// 				if(err) reject(err)
-				// 				else {
-				// 					console.log("a = "+loop);
-				// 					console.log(data);
-				// 					current.categories = data;
-				// 					dataResult.push(current);
-				// 					resolveParrent(loop);
-				// 				}
-				// 			})
-				// 		}).catch(function(err){
-				// 			callback(err)
-				// 		});
-				// 	}).then(function(loop){
-				// 		console.log("b = "+loop);
-				// 		if(loop == result.length-1) callback(null, dataResult);
-				// 			// console.log(dataResult);
-				// 	}).catch(function(err){
-				// 		callback(err)
-				// 	});
-				// }
-				
+				    var loop = function() {
+				        if (!condition()) return resolver.resolve();
+				        return Promise.cast(action())
+				            .then(loop)
+				            .catch(resolver.reject);
+				    };
+
+				    process.nextTick(loop);
+
+				    return resolver.promise;
+				};	
+
+				promiseWhile(function() {
+				    // Condition for stopping
+				    return sum < stop;
+				}, function() {
+				    // Action to run, should return a promise
+				    return prom1(result[sum]);
+				}).then(function() {
+				    // Notice we can chain it because it's a Promise, 
+				    // this will run after completion of the promiseWhile Promise!
+				    callback(null, data);	
+				});		
 			}
 		});
 	};
