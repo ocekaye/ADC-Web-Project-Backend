@@ -20,6 +20,7 @@ module.exports = function(Content) {
 		accepts: [
 			{ arg: 'title', type: 'string', required: true},
 			{ arg: 'description', type: 'string'},
+			{ arg: 'content-description', type: 'string'},
 			{ arg: 'picture', type: 'string'},
 			{ arg: 'data', type: 'array', required: true},
 			{ arg: 'category', type: 'array', http: { source: 'query' }},
@@ -33,9 +34,9 @@ module.exports = function(Content) {
 		
 	});
 
-	Content.new = function(title, description, picture, data, category, tag, callback){
+	Content.new = function(title, description, content_description, picture, data, category, tag, callback){
 		var accessToken = helpers.account.get();
-		var res = {"accountId":accessToken.userId, "title":title, "description":description, "picture":picture, "data":data};
+		var res = {"accountId":accessToken.userId, "title":title, "description":description, "content_description":content_description, "picture":picture, "data":data};
 		Content.create(res, function(err, result){
 			if(err) callback(err);
 			else callback(null, result);
@@ -102,6 +103,7 @@ module.exports = function(Content) {
 			{ arg: 'id', type: 'string', required: true, description: 'Content id.'},
 			{ arg: 'title', type: 'string', required: true},
 			{ arg: 'description', type: 'string'},
+			{ arg: 'content-description', type: 'string'},
 			{ arg: 'picture', type: 'string'},
 			{ arg: 'data', type: 'string', required: true}
 		],
@@ -111,10 +113,10 @@ module.exports = function(Content) {
 		
 	});
 
-	Content.edit = function(id, title, description, picture, data, callback){
+	Content.edit = function(id, title, description, content_description, picture, data, callback){
 		var accessToken = helpers.account.get();
 		var account = Content.app.models.Account;
-		var dataObject = {"id":id,"accountId":accessToken.userId, "title":title, "description":description, "picture":picture, "data":data};
+		var dataObject = {"id":id,"accountId":accessToken.userId, "title":title, "description":description, "content_description":content_description, "picture":picture, "data":data};
 		var prom = new Promise(function(resolve, reject){
 			Content.findById(id, function(err, res){
 				if(err)reject(err);
@@ -196,8 +198,8 @@ module.exports = function(Content) {
 		var ctgT = Content.app.models.CategoryTerm;
 		var ctg = Content.app.models.Category;
 		if (!offset) offset = 0;
-		if (!limit) limit = 6;
-		var filter = {include: ['owner'], skip: offset, limit: limit};
+		if (!limit) limit = 10;
+		var filter = {include: ['owner'], skip: offset, limit: limit, order: 'createdAt DESC'};
 		
 		Content.find(filter, function(err, result){
 			if(err) callback(err)
@@ -222,17 +224,25 @@ module.exports = function(Content) {
 						return idCategorys;
 					}).then(function(idCategorys){
 						// console.log(idCategorys);
+
 						var filter = {"where": {"id":{"inq":idCategorys}}};
 						ctg.find(filter, function(err, res){
 							if(err) reject(err);
 							else{
 								content.categorys = res;
+								console.log("in "+content.title);
 								data.push(content);
-								sum++;
+								return res;
 							} 
 						});
-					}).catch(function(err){
+					}).then(function(res){
+						console.log("after in");
 						sum++;
+						if (sum < stop) {
+							go = true;
+						} else go = false;
+					}).catch(function(err){
+						// sum++;
 					});		
 				}
 				var promiseWhile = function(condition, action) {
@@ -250,15 +260,21 @@ module.exports = function(Content) {
 				    return resolver.promise;
 				};	
 
+				var go = true;
+
 				promiseWhile(function() {
 				    // Condition for stopping
-				    return sum < stop;
+					return go;
+				    // return sum < stop;
 				}, function() {
 				    // Action to run, should return a promise
+
+				    console.log(result[sum].title);
 				    return prom1(result[sum]);
 				}).then(function() {
 				    // Notice we can chain it because it's a Promise, 
 				    // this will run after completion of the promiseWhile Promise!
+				    console.log(data.length);
 				    callback(null, data);	
 				});		
 			}

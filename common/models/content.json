@@ -19,6 +19,10 @@
       "type": "string",
       "default": ""
     },
+    "content_description": {
+      "type": "string",
+      "default": ""
+    },
     "data": {
       "type": [
         "object"
