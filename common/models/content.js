@@ -153,8 +153,11 @@ module.exports = function(Content) {
 		Content.findById(id, filter, function(err, result){
 			if(err) callback(err)
 			else {
+				if(!result) {
+					callback("not found");
+					return;
+				}
 				new Promise(function(resolve, reject){
-					console.log(id);
 					ctgT.find({"where":{"contentId":id}}, function(err , category){
 						if(err) reject(err);
 						else{
@@ -170,6 +173,7 @@ module.exports = function(Content) {
 					return idCategorys;
 				}).then(function(idCategorys){
 					// console.log(idCategorys);
+				
 					var filter = {"where": {"id":{"inq":idCategorys}}};
 					ctg.find(filter, function(err, res){
 						if(err) reject(err);
@@ -178,6 +182,8 @@ module.exports = function(Content) {
 							callback(null, result);
 						} 
 					});
+				}).catch(function(err){
+					callback(err);
 				});				
 			}
 		});
