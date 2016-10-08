@@ -161,7 +161,6 @@ module.exports = function(Content) {
 					ctgT.find({"where":{"contentId":id}}, function(err , category){
 						if(err) reject(err);
 						else{
-							// console.log(category);
 							resolve(category);
 						} 
 					});
@@ -172,7 +171,6 @@ module.exports = function(Content) {
 					}
 					return idCategorys;
 				}).then(function(idCategorys){
-					// console.log(idCategorys);
 				
 					var filter = {"where": {"id":{"inq":idCategorys}}};
 					ctg.find(filter, function(err, res){
@@ -286,7 +284,6 @@ module.exports = function(Content) {
 			}
 		});
 	};
-
 
 
 };

@@ -70,7 +70,8 @@
       "property": [
         "findContent",
         "count",
-        "show"
+        "show",
+        "getContentCategorys"
       ]
     },
     {
