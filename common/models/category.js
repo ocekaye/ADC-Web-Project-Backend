@@ -2,7 +2,7 @@ var Promise = require('bluebird');
 module.exports = function(Category) {
 
 
-	Category.remoteMethod('getContentCategorys', 
+	Category.remoteMethod('getContentCategorys',
 	{
 		http: { path: '/findContentByCategory', verb: 'get' },
 		accepts: { arg: 'ids', type: 'array', required: true, description: 'Categorys id.', http: { source: 'query' } },
@@ -11,7 +11,7 @@ module.exports = function(Category) {
 	});
 
 	Category.getContentCategorys = function(ids, callback){
-	
+
 		console.log('this is array = '+ids);
 		datas = [];
 		var filter = {fields: {id: true, data: false}};
@@ -30,31 +30,32 @@ module.exports = function(Category) {
 							reject(err);
 						}
 					else{
-						var dataContent = {};
-						dataContent.name = result.name;
-						dataContent.id = result.id;
-						result.content(function(err, res){
-							if(err) {
-								reject(err);
-							}else{
-								var idContent = [];
-								for (var i = 0; i < res.length; i++) {
-									idContent.push(res[i].contentId);
-								}
-								var filter = {where: {id: {inq:idContent}}, skip: 0, limit: 4, order: 'createdAt DESC', fields: {id: true, title: true, picture: true}};
-								var cntn = Category.app.models.Content;
-								cntn.find(filter, function(err, cnt){
-									if(err) reject(err);
-									else {
-										dataContent.content = cnt;
-										datas.push(dataContent);
-										sum++;
-										resolve(cnt);
-									}
-								});
-							}
-						});
-						
+					  if(result){
+              var dataContent = {};
+              dataContent.name = result.name;
+              dataContent.id = result.id;
+              result.content(function(err, res){
+                if(err) {
+                  reject(err);
+                }else{
+                  var idContent = [];
+                  for (var i = 0; i < res.length; i++) {
+                    idContent.push(res[i].contentId);
+                  }
+                  var filter = {where: {id: {inq:idContent}}, skip: 0, limit: 4, order: 'createdAt DESC', fields: {id: true, title: true, picture: true, uri: true}};
+                  var cntn = Category.app.models.Content;
+                  cntn.find(filter, function(err, cnt){
+                    if(err) reject(err);
+                    else {
+                      dataContent.content = cnt;
+                      datas.push(dataContent);
+                      sum++;
+                      resolve(cnt);
+                    }
+                  });
+                }
+              });
+            }else  reject("Not Found");
 					}
 				});
 			}).catch(function(err){
@@ -101,12 +102,12 @@ module.exports = function(Category) {
 		//     // Action to run, should return a promise
 		//     return prom1(ids[sum]);
 		// }).then(function() {
-		//     // Notice we can chain it because it's a Promise, 
+		//     // Notice we can chain it because it's a Promise,
 		//     // this will run after completion of the promiseWhile Promise!
-		//     callback(null, datas);	
-		// });		
-		
+		//     callback(null, datas);
+		// });
+
 	};
 
-	
+
 };

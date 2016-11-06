@@ -2,11 +2,11 @@ var Promise = require('bluebird');
 
 module.exports = function(Content) {
 	var helpers = require('utils');
-	Content.disableRemoteMethod('create', true);               
-	Content.disableRemoteMethod('upsert', true);               
-	Content.disableRemoteMethod('deleteById', true);    
-	Content.disableRemoteMethod('updateAll', true);    
-	Content.disableRemoteMethod('updateAttributes', false);  
+	Content.disableRemoteMethod('create', true);
+	Content.disableRemoteMethod('upsert', true);
+	Content.disableRemoteMethod('deleteById', true);
+	Content.disableRemoteMethod('updateAll', true);
+	Content.disableRemoteMethod('updateAttributes', false);
 	Content.disableRemoteMethod('createChangeStream', true);
 	Content.disableRemoteMethod('find', true);
 	Content.disableRemoteMethod('findById', true);
@@ -29,9 +29,9 @@ module.exports = function(Content) {
 		description: [
 			'Insert new content.'
 		],
-		
+
 		returns:{ arg: 'result', type: 'string', 'root': true }
-		
+
 	});
 
 	Content.new = function(title, description, content_description, picture, data, category, tag, callback){
@@ -41,7 +41,7 @@ module.exports = function(Content) {
 			if(err) callback(err);
 			else callback(null, result);
 		});
-		
+
 	};
 
 	Content.remoteMethod('delete',
@@ -54,9 +54,9 @@ module.exports = function(Content) {
 		description: [
 			'Delete content.'
 		],
-		
+
 		returns:{ arg: 'result', type: 'string', 'root': true }
-		
+
 	});
 
 	Content.delete = function(id, callback){
@@ -69,7 +69,7 @@ module.exports = function(Content) {
 						if(err) reject(err);
 						else{
 							resolve(owner);
-						} 
+						}
 					});
 				}).then(function(owner){
 					if(""+accessToken.userId === ""+owner.id){
@@ -92,7 +92,7 @@ module.exports = function(Content) {
 				});
 			}
 		});
-		
+
 	};
 
 	Content.remoteMethod('edit',
@@ -108,9 +108,9 @@ module.exports = function(Content) {
 			{ arg: 'data', type: 'string', required: true}
 		],
 		description: ['Edit Content.'],
-		
+
 		returns:{ arg: 'result', type: 'string', root: true }
-		
+
 	});
 
 	Content.edit = function(id, title, description, content_description, picture, data, callback){
@@ -144,12 +144,12 @@ module.exports = function(Content) {
 		description: ['Find content by id.'],
 		returns: {arg: 'result', type: 'string', root: true}
 	});
-	
+
 	Content.findContent = function(id, callback){
 		var ctgT = Content.app.models.CategoryTerm;
 		var ctg = Content.app.models.Category;
 		var filter = {include: ['owner']};
-		
+
 		Content.findById(id, filter, function(err, result){
 			if(err) callback(err)
 			else {
@@ -162,7 +162,7 @@ module.exports = function(Content) {
 						if(err) reject(err);
 						else{
 							resolve(category);
-						} 
+						}
 					});
 				}).then(function(category){
 					var idCategorys = [];
@@ -171,21 +171,74 @@ module.exports = function(Content) {
 					}
 					return idCategorys;
 				}).then(function(idCategorys){
-				
+
 					var filter = {"where": {"id":{"inq":idCategorys}}};
 					ctg.find(filter, function(err, res){
 						if(err) reject(err);
 						else{
 							result.categorys = res;
 							callback(null, result);
-						} 
+						}
 					});
 				}).catch(function(err){
 					callback(err);
-				});				
+				});
 			}
 		});
 	};
+
+  Content.remoteMethod('findContentByUri',
+    {
+      http: {path: '/:uri/findContentByUri', verb: 'get'},
+      accepts: {arg: 'uri', type:'string', required: true, description: 'Content Uri.'},
+      description: ['Find content by Uri.'],
+      returns: {arg: 'result', type: 'string', root: true}
+    });
+
+  Content.findContentByUri = function(uri, callback){
+    var ctgT = Content.app.models.CategoryTerm;
+    var ctg = Content.app.models.Category;
+    var filter = {where:{uri:uri}, include: ['owner']};
+
+    Content.find(filter, function(err, res){
+      if(err) callback(err)
+      else {
+        var result = res[0];
+        if(!result) {
+          callback("not found");
+          return;
+        }
+        var id = result.id;
+        console.log(id);
+        new Promise(function(resolve, reject){
+          ctgT.find({"where":{"contentId":id}}, function(err , category){
+            if(err) reject(err);
+            else{
+              resolve(category);
+            }
+          });
+        }).then(function(category){
+          var idCategorys = [];
+          for (var i = 0; i < category.length; i++ ){
+            idCategorys.push(category[i].categoryId);
+          }
+          return idCategorys;
+        }).then(function(idCategorys){
+
+          var filter = {"where": {"id":{"inq":idCategorys}}};
+          ctg.find(filter, function(err, res){
+            if(err) reject(err);
+            else{
+              result.categorys = res;
+              callback(null, result);
+            }
+          });
+        }).catch(function(err){
+          callback(err);
+        });
+      }
+    });
+  };
 
 	Content.remoteMethod('show',
 	{
@@ -203,86 +256,102 @@ module.exports = function(Content) {
 		var ctg = Content.app.models.Category;
 		if (!offset) offset = 0;
 		if (!limit) limit = 10;
-		var filter = {include: ['owner'], skip: offset, limit: limit, order: 'createdAt DESC'};
-		
-		Content.find(filter, function(err, result){
-			if(err) callback(err)
-			else {
-				data = [];
-				var sum = 0, stop =  result.length;
-				console.log("length = "+stop);
-				var prom1 = function(content){
-					return new Promise(function(resolve, reject){
-						ctgT.find({"where":{"contentId":content.id}}, function(err , category){
-							if(err) reject(err);
-							else{
-								// console.log(category);
-								resolve(category);
-							} 
-						});
-					}).then(function(category){
-						var idCategorys = [];
-						for (var i = 0; i < category.length; i++ ){
-							idCategorys.push(category[i].categoryId);
-						}
-						return idCategorys;
-					}).then(function(idCategorys){
-						// console.log(idCategorys);
+    Content.count("", function (err, r) {
+      if(err) callback(err);
+      fData = {};
+      fData.count = r;
+      if(offset > r){
+        offset = 0;
+      }
+      var filter = {include: ['owner'], skip: offset, limit: limit, order: 'createdAt DESC'};
 
-						var filter = {"where": {"id":{"inq":idCategorys}}};
-						ctg.find(filter, function(err, res){
-							if(err) reject(err);
-							else{
-								content.categorys = res;
-								console.log("in "+content.title);
-								data.push(content);
-								return res;
-							} 
-						});
-					}).then(function(res){
-						console.log("after in");
-						sum++;
-						if (sum < stop) {
-							go = true;
-						} else go = false;
-					}).catch(function(err){
-						// sum++;
-					});		
-				}
-				var promiseWhile = function(condition, action) {
-				    var resolver = Promise.defer();
+      Content.find(filter, function(err, result){
 
-				    var loop = function() {
-				        if (!condition()) return resolver.resolve();
-				        return Promise.cast(action())
-				            .then(loop)
-				            .catch(resolver.reject);
-				    };
+        if(err) callback(err)
+        else {
+          data = [];
+          var sum = 0, stop =  result.length;
+          console.log("length = "+stop);
+          var prom1 = function(content){
+            return new Promise(function(resolve, reject){
+              ctgT.find({"where":{"contentId":content.id}}, function(err , category){
+                if(err) reject(err);
+                else{
+                  // console.log(category);
+                  resolve(category);
+                }
+              });
+            }).then(function(category){
+              var idCategorys = [];
+              for (var i = 0; i < category.length; i++ ){
+                idCategorys.push(category[i].categoryId);
+              }
+              return idCategorys;
+            }).then(function(idCategorys){
+              // console.log(idCategorys);
 
-				    process.nextTick(loop);
+              var filter = {"where": {"id":{"inq":idCategorys}}};
+              ctg.find(filter, function(err, res){
+                if(err) reject(err);
+                else{
+                  content.categorys = res;
+                  console.log("in "+content.title);
+                  data.push(content);
+                  return res;
+                }
+              });
+            }).then(function(res){
+              console.log("after in");
+              sum++;
+              if (sum < stop) {
+                go = true;
+              } else go = false;
+            }).catch(function(err){
+              // sum++;
+            });
+          }
+          var promiseWhile = function(condition, action) {
+            var resolver = Promise.defer();
 
-				    return resolver.promise;
-				};	
+            var loop = function() {
+              if (!condition()) return resolver.resolve();
+              return Promise.cast(action())
+                .then(loop)
+                .catch(resolver.reject);
+            };
 
-				var go = true;
+            process.nextTick(loop);
 
-				promiseWhile(function() {
-				    // Condition for stopping
-					return go;
-				    // return sum < stop;
-				}, function() {
-				    // Action to run, should return a promise
+            return resolver.promise;
+          };
 
-				    console.log(result[sum].title);
-				    return prom1(result[sum]);
-				}).then(function() {
-				    // Notice we can chain it because it's a Promise, 
-				    // this will run after completion of the promiseWhile Promise!
-				    console.log(data.length);
-				    callback(null, data);	
-				});		
-			}
-		});
+          var go = true;
+
+          promiseWhile(function() {
+            // Condition for stopping
+            return go;
+            // return sum < stop;
+          }, function() {
+            // Action to run, should return a promise
+
+            // console.log(result[sum].title);
+            return prom1(result[sum]);
+          }).then(function() {
+            // Notice we can chain it because it's a Promise,
+            // this will run after completion of the promiseWhile Promise!
+            // console.log(data.length);
+            Content.count("", function (err, r) {
+              if (err) callback(err);
+              fData.data = data;
+              callback(null, fData);
+            });
+          });
+        }
+      });
+
+
+    });
+
 	};
 
 

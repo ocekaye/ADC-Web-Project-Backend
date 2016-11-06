@@ -71,7 +71,8 @@
         "findContent",
         "count",
         "show",
-        "getContentCategorys"
+        "getContentCategorys",
+        "findContentByUri"
       ]
     },
     {
