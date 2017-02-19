@@ -5,13 +5,18 @@ module.exports = function(Category) {
 	Category.remoteMethod('getContentCategorys',
 	{
 		http: { path: '/findContentByCategory', verb: 'get' },
-		accepts: { arg: 'ids', type: 'array', required: true, description: 'Categorys id.', http: { source: 'query' } },
+		accepts: [
+		  { arg: 'ids', type: 'array', required: true, description: 'Categorys id.', http: { source: 'query' } },
+      {arg: 'offset', type:'string', description: 'offset.'},
+      {arg: 'limit', type:'string', description: 'limit.'}
+		  ],
 		description: ['Find content by categoy'],
 		returns: {arg: 'result', type: 'string', root: true}
 	});
 
-	Category.getContentCategorys = function(ids, callback){
-
+	Category.getContentCategorys = function(ids, offset, limit, callback){
+    if (!offset) offset = 0;
+    if (!limit) limit = 4;
 		console.log('this is array = '+ids);
 		datas = [];
 		var filter = {fields: {id: true, data: false}};
@@ -42,7 +47,7 @@ module.exports = function(Category) {
                   for (var i = 0; i < res.length; i++) {
                     idContent.push(res[i].contentId);
                   }
-                  var filter = {where: {id: {inq:idContent}}, skip: 0, limit: 4, order: 'createdAt DESC', fields: {id: true, title: true, picture: true, uri: true}};
+                  var filter = {where: {id: {inq:idContent}},include: ['owner'], skip: offset, limit: limit, order: 'createdAt DESC', fields: {id: true, title: true, picture: true, uri: true, owner: true}};
                   var cntn = Category.app.models.Content;
                   cntn.find(filter, function(err, cnt){
                     if(err) reject(err);
