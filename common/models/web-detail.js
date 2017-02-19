@@ -1,5 +1,5 @@
 module.exports = function(WebDetail) {
-/*var helpers = require('utils');
+var helpers = require('utils');
 	WebDetail.remoteMethod(
 		'getIdByToken',
 		{
@@ -11,6 +11,6 @@ module.exports = function(WebDetail) {
 		WebDetail.getIdByToken = function(callback){
 			  var accessToken = helpers.account.get();
 			  callback(null, accessToken);
-		};*/
+		};
 
 };
